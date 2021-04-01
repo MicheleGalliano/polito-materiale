@@ -1,14 +1,10 @@
 import os
 import sys
-
 from polito_web import PolitoWeb
 from infi.systray import SysTrayIcon
 
 def say_hello(systray):
     print("Hello, World!")
-menu_options = (("Say Hello", None, say_hello),)
-systray = SysTrayIcon("D:\Documenti\Poli\polito-materiale-master\src\icon.ico", "Example tray icon", menu_options)
-systray.start()
 
 if __name__ == "__main__":
     # Creo la sessione.
@@ -19,7 +15,6 @@ if __name__ == "__main__":
     
     home = os.path.expanduser('~')
     if sys.platform.startswith('win'):
-        sess.set_dl_folder("D:\\Documenti\\Poli\\MATERIALE")
     else:
         sess.set_dl_folder(home + "/polito-materiale")
 
@@ -43,7 +38,6 @@ if __name__ == "__main__":
     )
 
     # Chiedo all'utente lo username e la password.
-    sess.login(username = "s270960@studenti.polito.it", password = "PASSWORD")
 
     # Mostro il menù.
     sess.menu()
