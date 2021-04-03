@@ -3,6 +3,7 @@ import html
 import os
 import re
 import subprocess
+from printy import printy
 
 import requests
 
@@ -17,8 +18,8 @@ class PolitoWeb:
     MAX_RETRY = 3  # Numero massimo per i tentativi di login
 
     
-    materieDaScaricare = [1, 4, 5, 6, 8]
-    materieDaScaricareText = ["Metodi matematici per l'ingegneria", "Programmazione a oggetti", "Calcolatori elettronici", "Basi di dati", "Algoritmi e programmazione"]
+    materieDaScaricare = []
+    #materieDaScaricareText = ["Metodi matematici per l'ingegneria", "Programmazione a oggetti", "Calcolatori elettronici", "Algoritmi e programmazione"]
 
     nome_file = "nomefile"
 
@@ -50,19 +51,19 @@ class PolitoWeb:
         if username is None and password is None:
             try:
                 while not self._login(username, password) and i < self.MAX_RETRY:
-                    print("Impossibile effettuare il login, riprova!")
+                    printy("Impossibile effettuare il login, riprova!", "rB")
                     i = i + 1
             except EOFError:
                 print("")
                 return None
         else:
             if not self._login(username, password):
-                print("Impossibile effettuare il login, riprova!")
+                printy("Impossibile effettuare il login, riprova!", "rB")
         if i == self.MAX_RETRY:
-            print(
+            printy(
                 "Impossibile effettuare il login dopo "
                 + str(self.MAX_RETRY)
-                + " tentativi."
+                + " tentativi.", "{r}"
             )
 
     def menu(self):
@@ -218,7 +219,7 @@ class PolitoWeb:
                     cartella_da_creare = os.path.join(cartella, name)
 
                     self._mkdir_if_not_exists(cartella_da_creare)
-                    print("Cartella: " + name)
+                    print("\tCartella: " + name)
                     new_path = self._my_path_join(cartella_da_creare, name)
 
                     # procedo ricorsivamente
@@ -229,17 +230,17 @@ class PolitoWeb:
                         # se non trovo un'estensione uso il nome del file normale
                         nome_del_file = i["nomefile"]
                         print(
-                            "[ WARNING  ] Nessuna estensione trovata. Uso il nome originale!"
+                            "\t\t[ WARNING  ] Nessuna estensione trovata. Uso il nome originale!"
                         )
                     else:
                         nome_del_file = i[self.nome_file]
 
                     if self._need_to_update_this(cartella, nome_del_file, i["date"]):
                         # scarico il file
-                        print("[ DOWNLOAD ] " + nome_del_file)
+                        print("\t\t[ DOWNLOAD ] " + nome_del_file)
                         self._download_file(cartella, nome_del_file, path, i["code"])
                     else:
-                        print("[    OK    ] " + nome_del_file)
+                        print("\t\t[    OK    ] " + nome_del_file)
 
     def _download_file(self, cartella, name, path, code):
         with requests.session() as s:
@@ -289,30 +290,13 @@ class PolitoWeb:
             self._get_lista_mat()
 
         i = 1
-        print("\nElenco del materiale disponibile - (CTRL+D per terminare)")
+        print("\n")
         for mat in self.lista_mat:
             print("[%.2d] %s" % (i, mat[2]))
-            if mat[2].strip() in self.materieDaScaricareText:
+            if i in self.materieDaScaricare:
                 self._select_mat(i - 1)
             i += 1
-        print("(Il download verrà effettuato nella cartella: " + self.dl_folder + ")")
-        x = -1
-        """for otto in range (len(self.materieDaScaricare)):
-            self._select_mat(self.materieDaScaricare[otto] - 1)
-        """    
-        """ while x not in range(1, i):
-            try:
-                #x = input("Materia: ")
-            except EOFError:
-                print()
-                return False  # Exit from while cycle of self.main()
-            if x.isnumeric():
-                x = int(x)
-            else:
-                continue"""
-
-        print("--- Fine! ---     premi INVIO")
-        #input()
+        print("--- Fine! ---")
         return False
 
     def _last_update_remote(self, folder_code):

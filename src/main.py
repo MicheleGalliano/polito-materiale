@@ -4,6 +4,7 @@ import time
 import os.path
 from polito_web import PolitoWeb
 from infi.systray import SysTrayIcon
+from printy import printy
 
 configFile="config.txt"
 
@@ -11,7 +12,7 @@ configFile="config.txt"
 def say_hello(systray):
     print("Hello, World!")
 def writeVariables(Config):
-    fpin=open(configFile,"w")
+    fpin=open(configFile,"a")
     for key in Config.keys():
         line=Config[key]
         fpin.write(line)
@@ -19,22 +20,26 @@ def writeVariables(Config):
 
 def checkConfig():
     Config={}
-    firstTime=1 # flag per capire se utente ha mai utilizzato il programma
-
+    
     project_dir=os.path.abspath(os.getcwd())# ottiene path della cartella principale del progetto
     config_file_path=os.path.join(project_dir,configFile)#crea percorso file config a partire da cartella locale
     #print(config_file_path)
     if os.path.isfile(config_file_path):
-        firstTime=0
-        print("File exist")
+        printy("File exist","nBU")
     else:
-        print("Config file non esistente, creo file %s in %s"%(configFile,project_dir))
-        path_materiale=input("inserisci percorso in cui si vuole salvare il materiale: ")
-        username=input("inserisci username con il quale accedi sul portale: ")
-        password=input("inserisci password con la quale accedi sul portale: ")
-        Config["PATH_MATERIALE"] = "Percorso-Materiale " + path_materiale + "\n"
-        Config["USER"]="Username "+username+"\n"
-        Config["PASS"]="Password "+password+"\n"
+        fpin=open(configFile,"w")
+        fpin.close()
+        printy("Config file non esistente", "yB")
+        print(", creo file %s in %s"%(configFile,project_dir))
+        
+        username=input("Inserisci username con il quale accedi sul portale: ")
+        password=input("Inserisci password con la quale accedi sul portale: ")
+        
+        path_materiale=input("Inserisci percorso in cui si vuole salvare il materiale: ")
+        
+        Config["PATH_MATERIALE"] = "Percorso-Materiale," + path_materiale + "\n"
+        Config["USER"]="Username,"+username+"\n"
+        Config["PASS"]="Password,"+password+"\n"
         writeVariables(Config)
 
 
@@ -44,11 +49,12 @@ def getVar(variable): #variable sarebbe il nome del path a cui vuoi accedere(ved
     fpin.close()
     for eachLine in data:
         if eachLine!="":
-            line_data=eachLine.split()
+            line_data=eachLine.split(",")
             Var_name=line_data[0]
             Var_path=line_data[1]
             if Var_name.strip()==variable.strip():
                 return Var_path
+    return ""
 
 
 
@@ -63,7 +69,7 @@ if __name__ == "__main__":
     # Creo la sessione.
     systray.start()
 
-    print("PoliTo Materiale - v 1.2.0", end="\n")
+    printy("PoliTo Materiale - v 1.2.0\n", "b")
     sess = PolitoWeb()
 
     # Imposto la cartella di download di default
@@ -96,6 +102,40 @@ if __name__ == "__main__":
 
     # Chiedo all'utente lo username e la password.
     sess.login(username = getVar("Username"), password = getVar("Password"))
+    
+    var = getVar("MaterialeSelezionato")
+    
+    if  var == "":
+        sess._get_lista_mat()
+
+        i = 1
+        printy("\nElenco del materiale disponibile - (CTRL+D per terminare)", "b>")
+        for mat in sess.lista_mat:
+            print("[%.2d] %s" % (i, mat[2]))
+            i += 1
+
+        n = int(input("Inserisci il numero di materie da scaricare: "))
+        stringa = "MaterialeSelezionato "
+        for j in range(n):
+            x = -1
+            while x not in range(1, i):
+                    x = input("Materia: ")
+                    if x.isnumeric():
+                        x = int(x)
+                        sess.materieDaScaricare.append(x)
+                        stringa+=str(x) + " "
+                    else:
+                       continue
+
+        dizionarioMateriale = {"MaterialeSelezionato": stringa}
+
+        writeVariables(dizionarioMateriale)
+    else:
+        lista = []
+        for element in var.split():
+            if element != "":
+                lista.append(int(element))
+        sess.materieDaScaricare = lista
 
     # Mostro il menù.
     sess.menu()
