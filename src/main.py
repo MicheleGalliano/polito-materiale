@@ -5,12 +5,13 @@ import os.path
 from polito_web import PolitoWeb
 from infi.systray import SysTrayIcon
 from printy import printy
+import win32api
 
 configFile="config.txt"
 
 
 def say_hello(systray):
-    print("Hello, World!")
+    print("Buona notte!")
 def writeVariables(Config):
     fpin=open(configFile,"a")
     for key in Config.keys():
@@ -29,6 +30,7 @@ def checkConfig():
     else:
         fpin=open(configFile,"w")
         fpin.close()
+        win32api.MessageBox(0, 'controllare prompt o eseguire .bat manualmente', 'Config file non esistente', 0x00001000 | 0x00000030 )
         printy("Config file non esistente", "yB")
         print(", creo file %s in %s"%(configFile,project_dir))
         
@@ -61,7 +63,7 @@ def getVar(variable): #variable sarebbe il nome del path a cui vuoi accedere(ved
 
 
 if __name__ == "__main__":
-    menu_options = (("Say Hello", None, say_hello),) # creazione menu icona
+    menu_options = (("Buona notte", None, say_hello),) # creazione menu icona
     systray = SysTrayIcon("D:\Documenti\Poli\polito-materiale-master\src\icon.ico", "Polito Materiale", menu_options)
     # creazione icona applicazione
     checkConfig()
@@ -115,7 +117,7 @@ if __name__ == "__main__":
             i += 1
 
         n = int(input("Inserisci il numero di materie da scaricare: "))
-        stringa = "MaterialeSelezionato "
+        stringa = "MaterialeSelezionato,"
         for j in range(n):
             x = -1
             while x not in range(1, i):
