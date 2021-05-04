@@ -64,7 +64,7 @@ def getVar(variable): #variable sarebbe il nome del path a cui vuoi accedere(ved
 
 if __name__ == "__main__":
     menu_options = (("Buona notte", None, say_hello),) # creazione menu icona
-    systray = SysTrayIcon("D:\Documenti\Poli\polito-materiale-master\src\icon.ico", "Polito Materiale", menu_options)
+    systray = SysTrayIcon(".\icon.ico", "Polito Materiale", menu_options)
     # creazione icona applicazione
     checkConfig()
     print()

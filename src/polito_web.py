@@ -142,13 +142,13 @@ class PolitoWeb:
                 headers=self.headers,
             )
             self.lista_mat = re.findall(
-                "cod_ins=(.+)&incarico=([0-9]+).+>(.+)[ ]*<", hp.text
+                "cod_ins=(.+)&incarico=([0-9]+).+>(.+)[ ]*</a>\n", hp.text
             )
 
     def _select_mat(self, indice):
         """
         Seleziona la materia, imposta i cookie per la materia corrente in
-        self.mat_cookie,  crea al cartella per ospirate i file scaricati e
+        self.mat_cookie,  crea la cartella per ospirate i file scaricati e
         ricava le informazioni sul last_update sia local che remote
         :param indice: indice della materia nella lista (self.lista_mat)
         """
@@ -201,8 +201,8 @@ class PolitoWeb:
             # per controllare gli aggiornamenti mi serve il codice della cartella
             # lo prendo dal parent code del primo elemento che mi capita
             if path == "/":
-                if len(contenuto["result"]) == 0:
-                    print("Nessun materiale disponibile per la materia selezionata!")
+                if len([i for i in contenuto["result"] if not i["name"].startswith("ZZZZZ")])==0:
+                    print("\t\tNessun materiale disponibile per la materia selezionata!")
                     return
                 else:
                     folder_code = contenuto["result"][0]["parent_code"]
