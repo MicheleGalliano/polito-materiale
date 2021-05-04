@@ -226,7 +226,7 @@ class PolitoWeb:
                     self._get_path_content(cartella_da_creare, new_path, i["code"])
 
                 elif i["type"] == "file":
-                    if not re.findall("\.(\w{1}[a-zA-Z])", i[self.nome_file]):   #si assume che le estensioni siano al massimo un numero e poi almeno una lettera
+                    if not re.findall("\.([a-zA-Z]|(\d{1}(?=[a-zA-Z])))", i[self.nome_file]):   #si assume che le estensioni siano al massimo un numero e poi almeno una lettera oppure solo lettere
                         # se non trovo un'estensione uso il nome del file normale
                         nome_del_file = i["nomefile"]
                         print(
