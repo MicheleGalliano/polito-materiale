@@ -30,7 +30,7 @@ def checkConfig():
     else:
         fpin=open(configFile,"w")
         fpin.close()
-        win32api.MessageBox(0, 'controllare prompt o eseguire .bat manualmente', 'Config file non esistente,', 0x00001000 | 0x00000030 )
+        win32api.MessageBox(0, 'controllare prompt o eseguire main.py manualmente', 'Config file per il download del materiale del poli non esistente!', 0x00001000 | 0x00000030 )
         printy("Config file non esistente", "yB")
         print("creo file %s in %s"%(configFile,project_dir))
         
