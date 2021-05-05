@@ -226,12 +226,15 @@ class PolitoWeb:
                     self._get_path_content(cartella_da_creare, new_path, i["code"])
 
                 elif i["type"] == "file":
-                    if not re.findall("\.([a-zA-Z]|(\d{1}(?=[a-zA-Z])))", i[self.nome_file]):   #si assume che le estensioni siano al massimo un numero e poi almeno una lettera oppure solo lettere
+                    if not re.search("\.([a-zA-Z]|(\d{1}(?=[a-zA-Z])))", i[self.nome_file]):   #si assume che le estensioni siano al massimo un numero e poi almeno una lettera oppure solo lettere
                         # se non trovo un'estensione uso il nome del file normale
-                        nome_del_file = i["nomefile"]
-                        print(
-                            "\t\t[ WARNING  ] Nessuna estensione trovata. Uso il nome originale!"
-                        )
+                        try:
+                            nome_del_file = i[self.nome_file]+"."+re.findall("\.([a-zA-Z]+|(\d{1}(?=[a-zA-Z])))", i["nomefile"])[0][0]  #aggiungo il punto e l'estensione al nome originale
+                        except:
+                            nome_del_file = i["nomefile"]   #se non c'è estensione allora uso il file originale
+                        print("\t\t[", end = "")
+                        printy(" WARNING  ", "o", end = "")
+                        print("] Nessuna estensione trovata. Aggiungo quella originale!")
                     else:
                         nome_del_file = i[self.nome_file]
 

@@ -30,9 +30,9 @@ def checkConfig():
     else:
         fpin=open(configFile,"w")
         fpin.close()
-        win32api.MessageBox(0, 'controllare prompt o eseguire .bat manualmente', 'Config file non esistente', 0x00001000 | 0x00000030 )
+        win32api.MessageBox(0, 'controllare prompt o eseguire .bat manualmente', 'Config file non esistente,', 0x00001000 | 0x00000030 )
         printy("Config file non esistente", "yB")
-        print(", creo file %s in %s"%(configFile,project_dir))
+        print("creo file %s in %s"%(configFile,project_dir))
         
         username=input("Inserisci username con il quale accedi sul portale: ")
         password=input("Inserisci password con la quale accedi sul portale: ")
