@@ -63,7 +63,8 @@ target/
 # My super secret stuff
 *.bin
 secret.py
-*.bat
 
 # pycharm
 .idea/
+
+config.txt

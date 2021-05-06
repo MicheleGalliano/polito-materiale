@@ -3,6 +3,7 @@ import html
 import os
 import re
 import subprocess
+from printy import printy
 
 import requests
 
@@ -17,8 +18,8 @@ class PolitoWeb:
     MAX_RETRY = 3  # Numero massimo per i tentativi di login
 
     
-    materieDaScaricare = [1, 4, 5, 6, 8]
-    materieDaScaricareText = ["Metodi matematici per l'ingegneria", "Programmazione a oggetti", "Calcolatori elettronici", "Basi di dati", "Algoritmi e programmazione"]
+    materieDaScaricare = []
+    #materieDaScaricareText = ["Metodi matematici per l'ingegneria", "Programmazione a oggetti", "Calcolatori elettronici", "Algoritmi e programmazione"]
 
     nome_file = "nomefile"
 
@@ -50,19 +51,19 @@ class PolitoWeb:
         if username is None and password is None:
             try:
                 while not self._login(username, password) and i < self.MAX_RETRY:
-                    print("Impossibile effettuare il login, riprova!")
+                    printy("Impossibile effettuare il login, riprova!", "rB")
                     i = i + 1
             except EOFError:
                 print("")
                 return None
         else:
             if not self._login(username, password):
-                print("Impossibile effettuare il login, riprova!")
+                printy("Impossibile effettuare il login, riprova!", "rB")
         if i == self.MAX_RETRY:
-            print(
+            printy(
                 "Impossibile effettuare il login dopo "
                 + str(self.MAX_RETRY)
-                + " tentativi."
+                + " tentativi.", "{r}"
             )
 
     def menu(self):
@@ -141,13 +142,13 @@ class PolitoWeb:
                 headers=self.headers,
             )
             self.lista_mat = re.findall(
-                "cod_ins=(.+)&incarico=([0-9]+).+>(.+)[ ]*<", hp.text
+                "cod_ins=(.+)&incarico=([0-9]+).+>(.+)[ ]*</a>\n", hp.text
             )
 
     def _select_mat(self, indice):
         """
         Seleziona la materia, imposta i cookie per la materia corrente in
-        self.mat_cookie,  crea al cartella per ospirate i file scaricati e
+        self.mat_cookie,  crea la cartella per ospirate i file scaricati e
         ricava le informazioni sul last_update sia local che remote
         :param indice: indice della materia nella lista (self.lista_mat)
         """
@@ -200,8 +201,8 @@ class PolitoWeb:
             # per controllare gli aggiornamenti mi serve il codice della cartella
             # lo prendo dal parent code del primo elemento che mi capita
             if path == "/":
-                if len(contenuto["result"]) == 0:
-                    print("Nessun materiale disponibile per la materia selezionata!")
+                if len([i for i in contenuto["result"] if not i["name"].startswith("ZZZZZ")])==0:
+                    print("\t\tNessun materiale disponibile per la materia selezionata!")
                     return
                 else:
                     folder_code = contenuto["result"][0]["parent_code"]
@@ -218,28 +219,31 @@ class PolitoWeb:
                     cartella_da_creare = os.path.join(cartella, name)
 
                     self._mkdir_if_not_exists(cartella_da_creare)
-                    print("Cartella: " + name)
+                    print("\tCartella: " + name)
                     new_path = self._my_path_join(cartella_da_creare, name)
 
                     # procedo ricorsivamente
                     self._get_path_content(cartella_da_creare, new_path, i["code"])
 
                 elif i["type"] == "file":
-                    if not re.findall("\.(\w{1,4})", i[self.nome_file]):
+                    if not re.search("\.([a-zA-Z]|(\d{1}(?=[a-zA-Z])))", i[self.nome_file]):   #si assume che le estensioni siano al massimo un numero e poi almeno una lettera oppure solo lettere
                         # se non trovo un'estensione uso il nome del file normale
-                        nome_del_file = i["nomefile"]
-                        print(
-                            "[ WARNING  ] Nessuna estensione trovata. Uso il nome originale!"
-                        )
+                        try:
+                            nome_del_file = i[self.nome_file]+"."+re.findall("\.([a-zA-Z]+|(\d{1}(?=[a-zA-Z])))", i["nomefile"])[0][0]  #aggiungo il punto e l'estensione al nome originale
+                        except:
+                            nome_del_file = i["nomefile"]   #se non c'è estensione allora uso il file originale
+                        print("\t\t[", end = "")
+                        printy(" WARNING  ", "o", end = "")
+                        print("] Nessuna estensione trovata. Aggiungo quella originale!")
                     else:
                         nome_del_file = i[self.nome_file]
 
                     if self._need_to_update_this(cartella, nome_del_file, i["date"]):
                         # scarico il file
-                        print("[ DOWNLOAD ] " + nome_del_file)
+                        print("\t\t[ DOWNLOAD ] " + nome_del_file)
                         self._download_file(cartella, nome_del_file, path, i["code"])
                     else:
-                        print("[    OK    ] " + nome_del_file)
+                        print("\t\t[    OK    ] " + nome_del_file)
 
     def _download_file(self, cartella, name, path, code):
         with requests.session() as s:
@@ -289,30 +293,13 @@ class PolitoWeb:
             self._get_lista_mat()
 
         i = 1
-        print("\nElenco del materiale disponibile - (CTRL+D per terminare)")
+        print("\n")
         for mat in self.lista_mat:
             print("[%.2d] %s" % (i, mat[2]))
-            if mat[2].strip() in self.materieDaScaricareText:
+            if i in self.materieDaScaricare:
                 self._select_mat(i - 1)
             i += 1
-        print("(Il download verrà effettuato nella cartella: " + self.dl_folder + ")")
-        x = -1
-        """for otto in range (len(self.materieDaScaricare)):
-            self._select_mat(self.materieDaScaricare[otto] - 1)
-        """    
-        """ while x not in range(1, i):
-            try:
-                #x = input("Materia: ")
-            except EOFError:
-                print()
-                return False  # Exit from while cycle of self.main()
-            if x.isnumeric():
-                x = int(x)
-            else:
-                continue"""
-
-        print("--- Fine! ---     premi INVIO")
-        #input()
+        print("--- Fine! ---")
         return False
 
     def _last_update_remote(self, folder_code):

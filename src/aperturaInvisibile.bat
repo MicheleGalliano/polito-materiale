@@ -1,0 +1,2 @@
+pythonw .\main.py
+
